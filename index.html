@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Game</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js" defer></script>
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <header>Memory Game</header>
+    <section id="game">
+        <p>{{ foundPair }} / {{ totalPair }}</p>
+        <button @click="ShuffleCards">Shuffle cards</button>
+        <div class="gridContainer">
+            <div v-for="card in cards" @click="select(card)" class="card">
+                {{ card.up }}   
+            </div>
+        </div>   
+    </section>
+</body>
+</html>
