@@ -7,17 +7,28 @@
     <link rel="stylesheet" href="style.css" />
     <script src="https://unpkg.com/vue@3/dist/vue.global.js" defer></script>
     <script src="app.js" defer></script>
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jacquarda+Bastarda+9&display=swap" rel="stylesheet">   
 </head>
 <body>
-    <header>Memory Game</header>
+    <header class="balletFont">Memory Game</header>
     <section id="game">
-        <p>{{ foundPair }} / {{ totalPair }}</p>
-        <button @click="ShuffleCards">Shuffle cards</button>
-        <div class="gridContainer">
-            <div v-for="card in cards" @click="select(card)" class="card">
-                {{ card.up }}   
+        <button v-if="!isGameStarted"@click="startGame" class="startButton"> Start Game </button>
+        <div v-if="isGameStarted">
+            <div class="bar">
+                <button @click="restartGame" class="restartButton" > Restart Game</button>
+                <p>{{ foundPair }} / {{ totalPair }}</p>
             </div>
-        </div>   
+            <div class="gridContainer">
+                <div v-for="card in cards" @click="select(card)" class="card">
+                    <img v-if="card.turned" v-bind:src="card.faceImage" class="card_image">
+                    <img v-else src="./images/cardBack.jpeg" class="card_image">
+                </div>
+            </div>  
+        </div> 
     </section>
 </body>
 </html>

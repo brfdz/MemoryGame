@@ -1,21 +1,21 @@
 
 const initialDeck = [];
-let aCharCode = 'a'.charCodeAt(0);
+const cardBackImageSrc = "./images/cardBack.jpeg";
 const numOfPairs = 8;
+
+createCard = function(index) {
+    return {
+        turned: false,
+        cardId: index,
+        faceImage: "./images/" + 'face_' + index + ".jpeg",  
+    }
+}
 
 createDeck = function(){
     for(let i = 0; i < numOfPairs; i++){
-        initialDeck.push({
-            turned: false,
-            face: String.fromCharCode(aCharCode + i), 
-            up: '#'
-        });
-
-        initialDeck.push({
-            turned: false,
-            face: String.fromCharCode(aCharCode + i), 
-            up: '#'
-        });
+        //Create a pair
+        initialDeck.push(createCard(i));
+        initialDeck.push(createCard(i));
     };
 };
 
@@ -29,6 +29,7 @@ const app = Vue.createApp({
             card2: '',
             totalPair: numOfPairs,
             foundPair: 0,
+            isGameStarted: false,
         }
     },
 
@@ -38,7 +39,7 @@ const app = Vue.createApp({
     watch: {
         card2(value) {
             if(value != ''){
-                setTimeout(this.isMatch, 200);
+                setTimeout(this.isMatch, 500);
             }
             
         },
@@ -51,33 +52,43 @@ const app = Vue.createApp({
     },
 
     methods:{
+        startGame(){
+            this.isGameStarted = true;
+            this.ShuffleCards();
+        },
+
+        restartGame(){
+            this.cards.forEach((card) => {
+                card.turned = false;
+            });
+            this.foundPair = 0;
+            this.card1 = '';
+            this.card2 = '';
+            this.ShuffleCards();
+        },
+
         select(picked){
             if(!picked.turned){
                 if(this.card1 == ''){
                     this.card1 = picked;
                     picked.turned = true;
-                    picked.up = picked.face;
                 }
                 else if(this.card2 == ''){
-                    this.card2 = picked
+                    this.card2 = picked;
                     picked.turned = true;
-                    picked.up = picked.face;
                 }
 
             }
         },
 
         isMatch() {
-            if(this.card1.face == this.card2.face){
+            if(this.card1.cardId == this.card2.cardId){
                 this.foundPair++;
-                // leave them turned
+                // leave them turned up
             }
             else{
-                // reset cards
-                this.card1.up = '#';
+                // turn the cards
                 this.card1.turned = false;
-
-                this.card2.up = '#';
                 this.card2.turned = false;
             }
 
