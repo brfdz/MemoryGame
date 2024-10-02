@@ -6,8 +6,9 @@ const numOfPairs = 8;
 createCard = function(index) {
     return {
         turned: false,
+        faceVisible: false,
         cardId: index,
-        faceImage: "./images/" + 'face_' + index + ".jpeg",  
+        faceImage: "./images/" + 'face_' + index + ".jpeg",
     }
 }
 
@@ -30,23 +31,20 @@ const app = Vue.createApp({
             totalPair: numOfPairs,
             foundPair: 0,
             isGameStarted: false,
+            isGameEnd: false,
         }
-    },
-
-    computed: {
     },
 
     watch: {
         card2(value) {
             if(value != ''){
-                setTimeout(this.isMatch, 500);
+                setTimeout(this.checkMatch, 500);
             }
-            
         },
 
         foundPair(value){
             if(value == this.totalPair){
-                alert("You won!");
+                this.isGameEnd = true;
             }
         }
     },
@@ -60,8 +58,10 @@ const app = Vue.createApp({
         restartGame(){
             this.cards.forEach((card) => {
                 card.turned = false;
+                card.faceVisible = false;
             });
             this.foundPair = 0;
+            this.isGameEnd = false;
             this.card1 = '';
             this.card2 = '';
             this.ShuffleCards();
@@ -71,30 +71,39 @@ const app = Vue.createApp({
             if(!picked.turned){
                 if(this.card1 == ''){
                     this.card1 = picked;
-                    picked.turned = true;
                 }
                 else if(this.card2 == ''){
                     this.card2 = picked;
-                    picked.turned = true;
                 }
-
+                else{
+                    return;
+                }   
+                picked.turned = true;
+                picked.faceVisible = true;
             }
         },
 
-        isMatch() {
+        checkMatch() {
             if(this.card1.cardId == this.card2.cardId){
                 this.foundPair++;
                 // leave them turned up
+                // clear selection
+                this.card1 = '';
+                this.card2 = '';
             }
             else{
-                // turn the cards
+                // turn the cards - trigger animations
                 this.card1.turned = false;
                 this.card2.turned = false;
-            }
-
-            // clear selection
-            this.card1 = '';
-            this.card2 = '';
+                setTimeout(() => {
+                    // Hide face after the flip animation completes
+                    this.card1.faceVisible = false; 
+                    this.card2.faceVisible = false;
+                    // clear selection
+                    this.card1 = '';
+                    this.card2 = '';
+                }, 400);  
+            } 
         },
 
         // Fisher-Yates (Knuth) shuffle algorithm

@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Jacquarda+Bastarda+9&display=swap" rel="stylesheet">   
 </head>
 <body>
-    <header class="balletFont">Memory Game</header>
+    <header>Memory Game</header>
     <section id="game">
         <button v-if="!isGameStarted"@click="startGame" class="startButton"> Start Game </button>
         <div v-if="isGameStarted">
@@ -23,10 +23,13 @@
                 <p>{{ foundPair }} / {{ totalPair }}</p>
             </div>
             <div class="gridContainer">
-                <div v-for="card in cards" @click="select(card)" class="card">
-                    <img v-if="card.turned" v-bind:src="card.faceImage" class="card_image">
-                    <img v-else src="./images/cardBack.jpeg" class="card_image">
+                <div v-for="card in cards" @mousedown="select(card)" class="card">
+                    <div class="cardContainer" :class="{ flipped: card.turned }">
+                        <img v-if="card.faceVisible" :src="card.faceImage" class="card_image front">
+                        <img src="./images/cardBack.jpeg" class="card_image back">
+                    </div>
                 </div>
+                <div v-show="isGameEnd" class="gameEnd">Congratulations! <br/><br/> You Won!</div>
             </div>  
         </div> 
     </section>
