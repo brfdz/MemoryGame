@@ -1,17 +1,20 @@
 
 const initialDeck = [];
 const cardBackImageSrc = "./images/cardBack.jpeg";
-const numOfPairs = 8;
+const numOfPairs = 15;
 
 createCard = function(index) {
     return {
         turned: false,
         faceVisible: false,
+        found: false,
         cardId: index,
         faceImage: "./images/" + 'face_' + index + ".jpeg",
     }
 }
 
+// create cards for all pairs
+//ordered 0...11
 createDeck = function(){
     for(let i = 0; i < numOfPairs; i++){
         //Create a pair
@@ -25,46 +28,98 @@ createDeck();
 const app = Vue.createApp({
     data(){
         return{
-            cards: initialDeck,
+            cards: [],
             card1: '',
             card2: '',
             totalPair: numOfPairs,
             foundPair: 0,
+            moves: 0,
             isGameStarted: false,
             isGameEnd: false,
+            selectedPairNumber: 8,
+            gridRows: 4,
+            windowWidth: window.innerWidth,
+            isEndWindowOpen: false,
         }
     },
 
     watch: {
         card2(value) {
             if(value != ''){
-                setTimeout(this.checkMatch, 500);
+                setTimeout(this.checkMatch, 300);
             }
         },
 
         foundPair(value){
-            if(value == this.totalPair){
+            if(value == this.selectedPairNumber){
                 this.isGameEnd = true;
+                this.isEndWindowOpen = true;
             }
         }
+    },
+    computed: {
+       gridColumns(){
+            if(this.windowWidth < 700){
+                switch(this.selectedPairNumber){
+                    case 15: this.gridRows = 6; return 5;
+                    case 12: this.gridRows = 6; break;
+                    case 10: this.gridRows = 5; break;
+                    default: this.gridRows = 4; break;
+
+                }
+                // max column number on smaller windows
+                return 4;
+            }
+
+            else{
+                this.gridRows = 4;
+                // column number
+                switch(this.selectedPairNumber){
+                    case 15: 
+                    this.gridRows = 5;
+                    return 6;
+                    case 12: return 6;
+                    case 10: return 5;
+                    default: return 4;
+
+                }
+            }
+            
+        },
+
     },
 
     methods:{
         startGame(){
+            // Create a random deck with selected number of pairs
+            this.cards = this.CreateRandomDeck(this.selectedPairNumber);
+        
             this.isGameStarted = true;
             this.ShuffleCards();
+        },
+
+        SelectPair(number){
+            this.selectedPairNumber = number;
         },
 
         restartGame(){
             this.cards.forEach((card) => {
                 card.turned = false;
                 card.faceVisible = false;
+                card.found = false;
             });
             this.foundPair = 0;
             this.isGameEnd = false;
+            this.moves = 0;
             this.card1 = '';
             this.card2 = '';
-            this.ShuffleCards();
+            this.isGameStarted = false;
+            //this.ShuffleCards();
+        },
+
+        playAgain(){
+            this.restartGame();
+            this.startGame();
         },
 
         select(picked){
@@ -84,26 +139,34 @@ const app = Vue.createApp({
         },
 
         checkMatch() {
+            this.moves++;
             if(this.card1.cardId == this.card2.cardId){
                 this.foundPair++;
                 // leave them turned up
                 // clear selection
+                this.card1.found = true;
+                this.card2.found = true;
                 this.card1 = '';
                 this.card2 = '';
             }
             else{
-                // turn the cards - trigger animations
-                this.card1.turned = false;
-                this.card2.turned = false;
-                setTimeout(() => {
-                    // Hide face after the flip animation completes
-                    this.card1.faceVisible = false; 
-                    this.card2.faceVisible = false;
-                    // clear selection
-                    this.card1 = '';
-                    this.card2 = '';
-                }, 400);  
+                 // wait before flipping the cards back
+                 setTimeout(this.FlipCardsBack, 500);
             } 
+        },
+
+        FlipCardsBack(){
+            // turn the cards - trigger animations
+            this.card1.turned = false;
+            this.card2.turned = false;
+            setTimeout(() => {
+                // Hide face after the flip animation completes
+                this.card1.faceVisible = false; 
+                this.card2.faceVisible = false;
+                // clear selection
+                this.card1 = '';
+                this.card2 = '';
+            }, 300); 
         },
 
         // Fisher-Yates (Knuth) shuffle algorithm
@@ -115,10 +178,44 @@ const app = Vue.createApp({
                 // Swap elements at index i and j
                 [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
               }
-              return array;
         },
 
+        CreateRandomDeck(pairNum){
+            let deck = initialDeck.slice(); // copy inital ordered deck
+
+            // pair amount that needs to be removed
+            let removeAmount = numOfPairs - pairNum; 
+
+            // randomly remove pairs from the deck until reached the desired count
+            for(let n = 0; n < removeAmount; n++){
+                // select a random pair 
+                removePairPosition = Math.floor(Math.random() * (deck.length / 2));
+                
+                // remove the pair
+                deck.splice(removePairPosition * 2, 2);
+            }
+
+            return deck;
+        },
+
+        handleResize(){
+            this.windowWidth = window.innerWidth;
+            // console.log("change window");
+            //this.cardWidth =  (this.windowWidth / 10) + 'rem';
+        },
+
+        PrintArray(array){
+            array.forEach(item => console.log(item.faceImage));
+        }
+
     },
+
+    mounted(){
+         window.addEventListener('resize', this.handleResize);
+    },
+    beforeUnmount(){
+          window.removeEventListener('resize', this.handleResize);
+    }
     
 });
 

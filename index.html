@@ -1,37 +1,89 @@
 <!doctype html>
-<html lang="en"> 
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Memory Game</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="images/icon.svg" />
     <script src="https://unpkg.com/vue@3/dist/vue.global.js" defer></script>
     <script src="app.js" defer></script>
 
     <!-- Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Jacquarda+Bastarda+9&display=swap" rel="stylesheet">   
+    <!-- Jacquarda Bastarda 9 -->
+    <link href="https://fonts.googleapis.com/css2?family=Jacquarda+Bastarda+9&display=swap" rel="stylesheet">
+    <!-- pixelify sans -->
+   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <header>Memory Game</header>
     <section id="game">
-        <button v-if="!isGameStarted"@click="startGame" class="startButton"> Start Game </button>
-        <div v-if="isGameStarted">
-            <div class="bar">
-                <button @click="restartGame" class="restartButton" > Restart Game</button>
-                <p>{{ foundPair }} / {{ totalPair }}</p>
+        <header :class="{'header_setting': !isGameStarted, 'header_game': isGameStarted}">
+            Memory Game
+        </header>
+        <section id="setting" v-if="!isGameStarted">
+            <div class="pair_selector_container">
+                <p class="setting_label pixelify-font">
+                    How many pairs?
+                </p>
+                <div class="pair_buttons_container">
+                    <div @mousedown="SelectPair(8)" class="pair_number_button jacquarda" :class="{'selected': selectedPairNumber == 8}">
+                        <p>8</p>
+                        <img src="./images/deckSelect_3.jpeg" class="card_image">
+                        
+                    </div>
+                    <div @mousedown="SelectPair(10)" class="pair_number_button jacquarda" :class="{'selected': selectedPairNumber == 10}">
+                        <p>10</p>
+                        <img src="./images/deckSelect_1.jpeg" class="card_image">
+                    </div>
+                    <div @mousedown="SelectPair(12)" class="pair_number_button jacquarda" :class="{'selected': selectedPairNumber == 12}">
+                        <p>12</p>
+                        <img src="./images/deckSelect_2.jpeg" class="card_image">
+                    </div>
+                    <div @mousedown="SelectPair(15)" class="pair_number_button jacquarda" :class="{'selected': selectedPairNumber == 15}">
+                        <p>15</p>
+                        <img src="./images/deckSelect_3.jpeg" class="card_image">
+                    </div>
+                </div>
             </div>
-            <div class="gridContainer">
+            <button @click="startGame" class="startButton pixelify-font"> Start New Game </button>
+        </section>
+        <div v-if="isGameStarted">
+            <section class="game_bar">
+                <button @click="restartGame" class="restartButton pixelify-font"> Return </button>
+                <div class="text-frame jacquarda">
+                    <p>{{ foundPair }} / {{ selectedPairNumber }}</p>
+                </div>
+                <div class="text-frame pixelify-font">
+                    <p> Moves: <span class="jacquarda">{{ moves }}</span></p>
+                </div>
+            </section>
+            <div class="gridContainer" :style="{'--columns': gridColumns, '--rows': gridRows}">
+                <!--:style="{ 'grid-template-columns': `repeat(${gridColumns}, 1fr)` } ">-->
                 <div v-for="card in cards" @mousedown="select(card)" class="card">
-                    <div class="cardContainer" :class="{ flipped: card.turned }">
-                        <img v-if="card.faceVisible" :src="card.faceImage" class="card_image front">
+                    <div class="cardContainer" :class="{ flipped: card.turned}">
+                        <img v-if="card.faceVisible" :src="card.faceImage" class="card_image front" :class="{found: card.found }">
                         <img src="./images/cardBack.jpeg" class="card_image back">
                     </div>
                 </div>
-                <div v-show="isGameEnd" class="gameEnd">Congratulations! <br/><br/> You Won!</div>
-            </div>  
-        </div> 
+            </div>
+        </div>
+        <div v-show="isGameEnd && isEndWindowOpen" class="gameEnd">
+            <button class="close pixelify-font" @click="isEndWindowOpen = false">X</button>
+            <p class="pixelify-font">
+                Well done!
+            </p>
+            <p class="small pixelify-font">
+                You matched all the pairs
+            </p>
+            <button @click="playAgain" class="play pixelify-font">
+                    Play Again
+            </button>
+        </div>
+
     </section>
 </body>
 </html>
